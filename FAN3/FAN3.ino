@@ -28,7 +28,7 @@ DeviceAddress insideThermometer;
 // Anzahl der Interrupts pro Umdrehung (1 oder 2)
 const int ANZAHL_INTERRUPTS = 1;
 // max. Temperatur
-#define Tmax 40.0 
+#define Tmax 35.0 
 // min. Temperatur                          
 #define Tmin 25.0
 // min. RPM                          
