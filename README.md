@@ -8,9 +8,10 @@ http://www.roger.de/wp-content/uploads/2015/08/Wandgehaeuse-Mininet.pdf
 Arduino Pro Mini
 
 ![image](https://www.arduino.cc/en/uploads/Main/ProMiniFront.jpg)
+
 https://www.arduino.cc/en/Main/ArduinoBoardProMini
 
-DS18S20 1-Wire Parasite-Power Digital Thermometer:
+DS18S20 1-Wire Parasite-Power Digital Thermometer
 ![image](http://www.14core.com/wp-content/uploads/2015/11/Temperature-Sensor-Dallas-Pinout-Diagram.jpg)
 https://www.maximintegrated.com/en/products/analog/sensors-and-sensor-interface/DS18S20.html
 
