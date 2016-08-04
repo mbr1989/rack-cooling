@@ -2,6 +2,7 @@
 Rack fan controller for 
 
 ![image](https://raw.githubusercontent.com/mbr1989/rack-cooling/master/pics/219SjhDcERL.jpg)
+![image](https://raw.githubusercontent.com/mbr1989/rack-cooling/master/pics/Zubeh%C3%B6r-Mininet.JPG)
 
 http://www.roger.de/wp-content/uploads/2015/08/Wandgehaeuse-Mininet.pdf
 
