@@ -28,16 +28,17 @@ DeviceAddress insideThermometer;
 // Anzahl der Interrupts pro Umdrehung (1 oder 2)
 const int ANZAHL_INTERRUPTS = 1;
 // max. Temperatur
-#define Tmax 35.0 
+#define Tmax 40.0 
 // min. Temperatur                          
-#define Tmin 20.0                           
+#define Tmin 25.0
+// min. RPM                          
+#define rpm_in_min 800                           
 
 // Variablen
 unsigned int  rpm_1_out = 0;
 unsigned int  rpm_2_out = 0;
 unsigned long rpm_1_in  = 0;
 unsigned long rpm_2_in  = 0;
-unsigned long rpm_in_min = 800;
 unsigned long rpm_1_cnt = 0;
 unsigned long rpm_2_cnt = 0;
 unsigned long lastmillis_pwm = 0;
@@ -82,7 +83,7 @@ void loop()
       Serial.println("no temperature sensor found");
     }
 
-    else if ( temperature >= 20.00 )
+    else if ( temperature >= Tmin )
     {
       // Tmin->0% // Tmax->100%
       const unsigned int FanSpeed = map(temperature, Tmin, Tmax, 0, 255);
@@ -90,7 +91,7 @@ void loop()
       rpm_2_out = FanSpeed;
     }
 
-    else if ( temperature < 20.00 )
+    else if ( temperature < Tmin )
     {
       rpm_1_out = 0;
       rpm_2_out = 0;
