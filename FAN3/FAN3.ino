@@ -34,7 +34,7 @@ const int ANZAHL_INTERRUPTS = 1;
 // min. RPM for alarm                         
 #define rpm_in_min 800
 // FAN RPM deadband                         
-#define deadband 20                             
+#define deadband 70                            
 
 // Variablen
 unsigned int  rpm_1_out = 0;

@@ -52,7 +52,7 @@ void loop()
       Serial.print("RPM 1 out ");
       Serial.println(rpm_1_out);
       
-      Serial.print("RPM 2 out");
+      Serial.print("RPM 2 out ");
       Serial.println(rpm_2_out);
 
     }
