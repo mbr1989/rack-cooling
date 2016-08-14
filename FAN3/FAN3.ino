@@ -32,7 +32,9 @@ const int ANZAHL_INTERRUPTS = 1;
 // min. Temperatur                          
 #define Tmin 25.0
 // min. RPM for alarm                         
-#define rpm_in_min 800                           
+#define rpm_in_min 800
+// FAN RPM deadband                         
+#define rpm_deadband 20                             
 
 // Variablen
 unsigned int  rpm_1_out = 0;
@@ -84,7 +86,7 @@ void loop()
     else if ( temperature >= Tmin && control_over_serial == false )
     {
       // Tmin->0% // Tmax->100%
-      const unsigned int FanSpeed = map(temperature, Tmin, Tmax, 0, 255);
+      const unsigned int FanSpeed = map(temperature, Tmin, Tmax, rpm_deadband, 255);
       RPM2FANs(FanSpeed, FanSpeed);
     }
 
