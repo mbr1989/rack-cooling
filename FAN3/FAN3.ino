@@ -91,7 +91,7 @@ void loop()
 
     else if ( temperature < Tmin )
     {
-      RPM2FANs(0, 0);
+      RPM2FANs(deadband, deadband);
     }
 
     Serial.print("Temperature is ");
