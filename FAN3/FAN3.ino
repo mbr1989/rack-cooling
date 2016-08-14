@@ -31,7 +31,7 @@ const int ANZAHL_INTERRUPTS = 1;
 #define Tmax 35.0 
 // min. Temperatur                          
 #define Tmin 25.0
-// min. RPM                          
+// min. RPM for alarm                         
 #define rpm_in_min 800                           
 
 // Variablen
@@ -44,6 +44,7 @@ unsigned long rpm_2_cnt = 0;
 unsigned long lastmillis_pwm = 0;
 unsigned long lastmillis_temp = 0;
 float temperature = 0;
+bool control_over_serial = false ;
  
 void setup()
 {
@@ -68,37 +69,29 @@ void setup()
  
 void loop()
 {
-  if (millis() - lastmillis_temp >= UPDATE_ZYKLUS_TEMP)
+  if ( (millis() - lastmillis_temp) >= UPDATE_ZYKLUS_TEMP )
   {
     sensors.requestTemperatures(); 
     temperature = sensors.getTempC(insideThermometer);
 
     if ( temperature == -127.00 )
     {
-      rpm_1_out = 255;
-      rpm_2_out = 255;
-      analogWrite(SW_FAN_1_PWM, 0);
-      analogWrite(SW_FAN_2_PWM, 0);
-      digitalWrite(ledPin, LOW);
+      RPM2FANs(255, 255);
+      SWFANstat(false);
       Serial.println("no temperature sensor found");
     }
 
-    else if ( temperature >= Tmin )
+    else if ( temperature >= Tmin && control_over_serial == false )
     {
       // Tmin->0% // Tmax->100%
       const unsigned int FanSpeed = map(temperature, Tmin, Tmax, 0, 255);
-      rpm_1_out = FanSpeed;
-      rpm_2_out = FanSpeed;
+      RPM2FANs(FanSpeed, FanSpeed);
     }
 
-    else if ( temperature < Tmin )
+    else if ( temperature < Tmin && control_over_serial == false )
     {
-      rpm_1_out = 0;
-      rpm_2_out = 0;
+      RPM2FANs(0, 0);
     }
-
-    analogWrite(FAN_1_PWM, rpm_1_out);
-    analogWrite(FAN_2_PWM, rpm_2_out);
 
     Serial.print("Temperature is ");
     Serial.print(temperature);
@@ -115,16 +108,26 @@ void loop()
     lastmillis_temp = millis();
   }
 
-  /* PWM über serial
+  // control over serial
   if (Serial.available())
   {
-    rpm_1_out = Serial.parseInt();
-    rpm_2_out = Serial.parseInt();
-    analogWrite(FAN_1_PWM, rpm_1_out);
-    analogWrite(FAN_2_PWM, rpm_2_out);
-  }*/
-  
-  // Tachosignal berechnen
+    const int tmp_rpm_1_out = Serial.parseInt();
+    const int tmp_rpm_2_out = Serial.parseInt();
+
+    if (tmp_rpm_1_out >= 0 && tmp_rpm_2_out >= 0)
+    {
+      control_over_serial == true;
+      RPM2FANs(tmp_rpm_1_out, tmp_rpm_2_out);
+      Serial.println("Control over serial is now true");
+    }
+    
+    else if (tmp_rpm_1_out < 0 || tmp_rpm_2_out < 0)
+    {
+      control_over_serial == false;
+      Serial.println("Control over serial is now false");
+    }
+  }
+    // Tachosignal berechnen
   if (millis() - lastmillis_pwm >= UPDATE_ZYKLUS_PWM)
   {
     // Interrupt deaktivieren um das rechnen nicht zu unterbrechen.
@@ -137,17 +140,13 @@ void loop()
 
     if ( rpm_1_in <= rpm_in_min )
     {
-      analogWrite(SW_FAN_1_PWM, 0);
-      analogWrite(SW_FAN_2_PWM, 0);
-      digitalWrite(ledPin, LOW);
+      SWFANstat(false); 
       Serial.println("FAN 1 speed limit undershot");
     }
 
     if ( rpm_2_in <= rpm_in_min )
     {
-      analogWrite(SW_FAN_1_PWM, 0);
-      analogWrite(SW_FAN_2_PWM, 0);
-      digitalWrite(ledPin, LOW);
+      SWFANstat(false);
       Serial.println("FAN 2 speed limit undershot");
     }
 
@@ -171,9 +170,53 @@ void loop()
 
   if ( rpm_1_in >= rpm_in_min && rpm_2_in >= rpm_in_min && temperature != -127.00 )
   {
+      SWFANstat(true); 
+  }
+}
+
+// Cisco SG300 Switch - FAN status
+void SWFANstat (bool SWFANstat)
+{
+  // FAN status is operational
+  if ( SWFANstat == true )
+  {
+      digitalWrite(ledPin, HIGH);
       analogWrite(SW_FAN_1_PWM, 255);
       analogWrite(SW_FAN_2_PWM, 255);
-      digitalWrite(ledPin, HIGH);
+  }
+
+  // FAN status is NOT operational
+  else if ( SWFANstat == false )
+  {
+      digitalWrite(ledPin, LOW);
+      analogWrite(SW_FAN_1_PWM, 0);
+      analogWrite(SW_FAN_2_PWM, 0);
+  }
+}
+
+// Write RPM to FANs
+void RPM2FANs(unsigned int rpm_1_out_new, unsigned int rpm_2_out_new)
+{
+  if (rpm_1_out_new != rpm_1_out)
+  {
+      rpm_1_out = rpm_1_out_new;
+      analogWrite(FAN_1_PWM, rpm_1_out);
+  }
+
+  else
+  {
+    
+  }
+
+  if (rpm_2_out_new != rpm_2_out)
+  {
+      rpm_2_out = rpm_2_out_new;
+      analogWrite(FAN_2_PWM, rpm_2_out);
+  }
+
+    else
+  {
+    
   }
 }
  
