@@ -34,7 +34,7 @@ const int ANZAHL_INTERRUPTS = 1;
 // min. RPM for alarm                         
 #define rpm_in_min 800
 // FAN RPM deadband                         
-#define rpm_deadband 20                             
+#define deadband 20                             
 
 // Variablen
 unsigned int  rpm_1_out = 0;
@@ -46,7 +46,6 @@ unsigned long rpm_2_cnt = 0;
 unsigned long lastmillis_pwm = 0;
 unsigned long lastmillis_temp = 0;
 float temperature = 0;
-bool control_over_serial = false ;
  
 void setup()
 {
@@ -83,14 +82,14 @@ void loop()
       Serial.println("no temperature sensor found");
     }
 
-    else if ( temperature >= Tmin && control_over_serial == false )
+    else if ( temperature >= Tmin )
     {
       // Tmin->0% // Tmax->100%
-      const unsigned int FanSpeed = map(temperature, Tmin, Tmax, rpm_deadband, 255);
+      const unsigned int FanSpeed = map(temperature, Tmin, Tmax, deadband, 255);
       RPM2FANs(FanSpeed, FanSpeed);
     }
 
-    else if ( temperature < Tmin && control_over_serial == false )
+    else if ( temperature < Tmin )
     {
       RPM2FANs(0, 0);
     }
@@ -110,26 +109,7 @@ void loop()
     lastmillis_temp = millis();
   }
 
-  // control over serial
-  if (Serial.available())
-  {
-    const int tmp_rpm_1_out = Serial.parseInt();
-    const int tmp_rpm_2_out = Serial.parseInt();
-
-    if (tmp_rpm_1_out >= 0 && tmp_rpm_2_out >= 0)
-    {
-      control_over_serial == true;
-      RPM2FANs(tmp_rpm_1_out, tmp_rpm_2_out);
-      Serial.println("Control over serial is now true");
-    }
-    
-    else if (tmp_rpm_1_out < 0 || tmp_rpm_2_out < 0)
-    {
-      control_over_serial == false;
-      Serial.println("Control over serial is now false");
-    }
-  }
-    // Tachosignal berechnen
+  // Tachosignal berechnen
   if (millis() - lastmillis_pwm >= UPDATE_ZYKLUS_PWM)
   {
     // Interrupt deaktivieren um das rechnen nicht zu unterbrechen.
