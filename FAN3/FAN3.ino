@@ -46,6 +46,7 @@ unsigned long rpm_2_cnt = 0;
 unsigned long lastmillis_pwm = 0;
 unsigned long lastmillis_temp = 0;
 float temperature = 0;
+float temperature_max = 0;
  
 void setup()
 {
@@ -72,8 +73,38 @@ void loop()
 {
   if ( (millis() - lastmillis_temp) >= UPDATE_ZYKLUS_TEMP )
   {
-    sensors.requestTemperatures(); 
-    temperature = sensors.getTempC(insideThermometer);
+    sensors.requestTemperatures();
+    float temperature_new = sensors.getTempC(insideThermometer);
+    if (temperature_new != temperature )
+    {
+      
+      if ( temperature_new > temperature )
+      {
+        temperature = temperature_new;
+        Serial.println("temp has risen");
+        if ( temperature_new > temperature_max )
+        {
+          temperature_max = temperature_new;
+          Serial.println("new max temp");
+        }
+      }
+
+      else if ( temperature_new < ( temperature - 0.2 ) )
+      {
+        temperature = temperature_new;
+        Serial.write("temp has dropped > 0.2");
+        Serial.write(" °");
+        Serial.println("C");
+      }      
+    }    
+
+    Serial.println("");
+    Serial.println("Temperatures");
+    
+    Serial.print("actual  ");
+    Serial.print(temperature_new);
+    Serial.write(" °");
+    Serial.println("C");
 
     if ( temperature == -127.00 )
     {
@@ -94,15 +125,14 @@ void loop()
       RPM2FANs(deadband, deadband);
     }
 
-    Serial.print("Temperature is ");
-    Serial.print(temperature);
-    Serial.print(" ");
-    Serial.write(0xB0);
+    Serial.print("maximum ");
+    Serial.print(temperature_max);
+    Serial.write(" °");
     Serial.println("C");
     
-    Serial.print("RPM 1 out ");
+    Serial.print("RPM 1 out  ");
     Serial.println(rpm_1_out);
-    Serial.print("RPM 2 out ");
+    Serial.print("RPM 2 out  ");
     Serial.println(rpm_2_out);
 
     // Zeitpunkt setzen
@@ -132,9 +162,9 @@ void loop()
       Serial.println("FAN 2 speed limit undershot");
     }
 
-    Serial.print("RPM 1 in ");
+    Serial.print("RPM 1  in ");
     Serial.println(rpm_1_in);
-    Serial.print("RPM 2 in ");
+    Serial.print("RPM 2  in ");
     Serial.println(rpm_2_in);
  
     // Counter zuruecksetzen
